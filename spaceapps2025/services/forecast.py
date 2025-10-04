@@ -64,3 +64,4 @@ def generate_forecast(
         lower=pd.Series(lower.values, index=forecast_index),
         upper=pd.Series(upper.values, index=forecast_index),
     )
+

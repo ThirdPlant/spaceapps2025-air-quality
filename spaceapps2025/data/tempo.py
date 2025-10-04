@@ -161,3 +161,4 @@ def load_geolocated_field(
         longitude=("x", geolocation["longitude"].values),
     )
     return merged
+

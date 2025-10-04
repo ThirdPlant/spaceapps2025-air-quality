@@ -342,9 +342,10 @@ def main() -> None:
 
     st.sidebar.markdown("---")
     st.sidebar.markdown(
-        "Built for the **NASA Space Apps Challenge 2025** — From EarthData to Action: Predicting Cleaner, Safer Skies."
+        "Built for the **NASA Space Apps Challenge 2025** -- From EarthData to Action: Predicting Cleaner, Safer Skies."
     )
 
 
 if __name__ == "__main__":
     main()
+

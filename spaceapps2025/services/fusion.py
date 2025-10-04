@@ -71,3 +71,4 @@ def aggregate_by_region(
         .reset_index()
     )
     return grouped
+

@@ -43,3 +43,4 @@ class FileCache:
         path = self.get_path(key, suffix)
         path.touch(exist_ok=True)
         return path
+

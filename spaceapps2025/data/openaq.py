@@ -122,3 +122,4 @@ class OpenAQClient:
                     }
                 )
         return pd.DataFrame(rows)
+

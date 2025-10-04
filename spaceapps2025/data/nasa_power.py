@@ -91,3 +91,4 @@ class NasaPowerClient:
                     )
         frame = pd.DataFrame(rows)
         return frame
+

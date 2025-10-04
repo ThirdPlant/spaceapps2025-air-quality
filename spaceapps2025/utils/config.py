@@ -42,3 +42,4 @@ def get_cache_root() -> Path:
     root = Path(os.environ.get("SPACEAPPS_CACHE_ROOT", "spaceapps_cache"))
     root.mkdir(parents=True, exist_ok=True)
     return root
+

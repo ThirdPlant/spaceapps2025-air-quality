@@ -50,3 +50,4 @@ def assess_air_quality(pollutant: str, value: float) -> AirQualityBand:
         if band.min_value <= value <= band.max_value:
             return band
     return bands[-1]
+

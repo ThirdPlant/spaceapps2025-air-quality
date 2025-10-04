@@ -94,3 +94,4 @@ def create_timelapse(
         coloraxis_colorbar=dict(title=units),
     )
     return figure
+

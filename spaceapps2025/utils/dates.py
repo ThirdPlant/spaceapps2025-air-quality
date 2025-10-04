@@ -19,3 +19,4 @@ def to_ymd(dt: date | datetime) -> str:
 
 def to_ymd_compact(dt: date | datetime) -> str:
     return dt.strftime("%Y%m%d")
+

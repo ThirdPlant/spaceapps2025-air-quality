@@ -26,3 +26,4 @@ def summarize_ground_data(frame: pd.DataFrame, pollutant: str) -> Dict[str, obje
         "peak_value": float(worst["value"]),
         "record_count": int(len(frame)),
     }
+
