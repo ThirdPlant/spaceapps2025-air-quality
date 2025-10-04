@@ -235,9 +235,28 @@ def main() -> None:
             ground_error = f"Unable to load OpenAQ measurements: {exc}"
             ground_data = pd.DataFrame()
 
+    weather_error: Optional[str] = None
     if include_weather:
-        with st.spinner("Fetching NASA POWER weather data..."):
-            weather_data = load_weather_data(bbox=bbox, start=start_date, end=end_date)
+        try:
+            with st.spinner("Fetching NASA POWER weather data..."):
+                weather_data = load_weather_data(bbox=bbox, start=start_date, end=end_date)
+        except requests.HTTPError as exc:
+            response = exc.response
+            status = getattr(response, "status_code", "unknown")
+            detail = ""
+            if response is not None:
+                try:
+                    detail = response.json().get("messages", [""])[0]  # type: ignore[arg-type]
+                except Exception:  # noqa: BLE001
+                    detail = (response.text or "").strip()[:200]
+            if detail:
+                weather_error = f"NASA POWER request failed (status {status}): {detail}"
+            else:
+                weather_error = f"NASA POWER request failed with status {status}."
+            weather_data = pd.DataFrame()
+        except Exception as exc:  # noqa: BLE001
+            weather_error = f"Unable to load NASA POWER data: {exc}"
+            weather_data = pd.DataFrame()
 
     if include_pm25:
         with st.spinner("Loading MERRA-2 PM2.5 analysis..."):
@@ -333,13 +352,16 @@ def main() -> None:
 
     with tabs[4]:
         st.subheader("Weather Context")
+        if weather_error:
+            st.warning(weather_error)
+
         if not weather_data.empty:
             parameter = st.selectbox("Weather parameter", sorted(weather_data["parameter"].unique()))
             subset = weather_data[weather_data["parameter"] == parameter]
             pivot = subset.pivot_table(index="date", values="value", aggfunc="mean")
             st.line_chart(pivot)
             st.caption("Daily mean from NASA POWER regional grid.")
-        else:
+        elif not weather_error:
             st.info("Weather data not requested.")
 
     with tabs[5]:
