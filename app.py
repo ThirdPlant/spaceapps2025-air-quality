@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import requests
 import streamlit as st
 import xarray as xr
 
@@ -206,14 +207,33 @@ def main() -> None:
                 max_granules=max_timelapse_granules,
             )
 
+    ground_error: Optional[str] = None
     if include_ground:
-        with st.spinner("Fetching ground sensor data from OpenAQ..."):
-            ground_data = load_openaq_data(
-                parameter=DEFAULT_GROUND_PARAMETER.get(pollutant, pollutant.lower()),
-                start_dt=datetime.combine(start_date, datetime.min.time()),
-                end_dt=datetime.combine(end_date, datetime.max.time()),
-                bbox=bbox,
-            )
+        try:
+            with st.spinner("Fetching ground sensor data from OpenAQ..."):
+                ground_data = load_openaq_data(
+                    parameter=DEFAULT_GROUND_PARAMETER.get(pollutant, pollutant.lower()),
+                    start_dt=datetime.combine(start_date, datetime.min.time()),
+                    end_dt=datetime.combine(end_date, datetime.max.time()),
+                    bbox=bbox,
+                )
+        except requests.HTTPError as exc:
+            response = exc.response
+            status = getattr(response, "status_code", "unknown")
+            detail = ""
+            if response is not None:
+                try:
+                    detail = response.json().get("message")  # type: ignore[arg-type]
+                except Exception:  # noqa: BLE001
+                    detail = (response.text or "").strip()[:200]
+            if detail:
+                ground_error = f"OpenAQ request failed (status {status}): {detail}"
+            else:
+                ground_error = f"OpenAQ request failed with status {status}."
+            ground_data = pd.DataFrame()
+        except Exception as exc:  # noqa: BLE001
+            ground_error = f"Unable to load OpenAQ measurements: {exc}"
+            ground_data = pd.DataFrame()
 
     if include_weather:
         with st.spinner("Fetching NASA POWER weather data..."):
@@ -277,11 +297,14 @@ def main() -> None:
 
     with tabs[2]:
         st.subheader("Ground Networks")
+        if ground_error:
+            st.warning(ground_error)
+
         if not ground_data.empty:
             st.plotly_chart(build_ground_map(ground_data, pollutant), use_container_width=True)
             with st.expander("Raw data"):
                 st.dataframe(ground_data)
-        else:
+        elif not ground_error:
             st.info("No ground measurements returned for the selected window and region.")
 
     with tabs[3]:
