@@ -1,0 +1,21 @@
+# Credentials
+.env
+
+# Local caches and downloads
+spaceapps_data/
+spaceapps_cache/
+nasa_data/
+tempo_data/
+tmp/
+
+# Outputs and media
+output/
+*.png
+*.nc
+
+# Python artifacts
+__pycache__/
+*.pyc
+
+# Streamlit
+.streamlit/
